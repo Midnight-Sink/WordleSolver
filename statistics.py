@@ -42,7 +42,7 @@ for i in range(97, 123):
     for j in range(5):
         n = 100*commonLetters[i][j]/totalWords
         commonSum+=n
-        print(str(round(n, 2)), end=',')
+        print(str(round(n, 2)), end=', ')
     print("] "+str(round(commonSum, 2)))
 
 print(scores[:10])

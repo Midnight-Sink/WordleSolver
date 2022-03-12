@@ -44,10 +44,11 @@ class WordleSolver:
 
         self.allWords = words.keys()
 
+        wordKeys = list(words.keys())
+
         # compute the scoring of each word (include usage scroing, which I have found to not be useful)
         # scoreFile = open(ScoreListPath, "r")
         # i = 0
-        # wordKeys = list(words.keys())
         # for score in scoreFile:
         #     words[wordKeys[i]] = int(score)/2
         #     if len(set(word)) == len(word):
@@ -58,14 +59,13 @@ class WordleSolver:
         # scoreFile.close()
 
         # remove words which are already guessed from the word list
-        usedFile = open(UsedListPath, "r")
-        wordKeys = list(words.keys())
-        for word in usedFile:
-            word = word.lower().rstrip()
-            # if the word has been used before it should not be used for guessing
-            if word in wordKeys:
-                del words[word]
-        usedFile.close()
+        # usedFile = open(UsedListPath, "r")
+        # for word in usedFile:
+        #     word = word.lower().rstrip()
+        #     # if the word has been used before it should not be used for guessing
+        #     if word in wordKeys:
+        #         del words[word]
+        # usedFile.close()
 
         # letter commonality scoring
         for word in words:
@@ -116,6 +116,32 @@ class WordleSolver:
         if self.checkDone():
             return "".join(self.solution)
 
+        # prune the list of words
+        j = 0
+        while j < len(self.words):
+            valid = True
+            word = self.words[j]
+            for i in range(self.WordLength):
+                if word[i] in self.noMoreInSolution and not (word[i] in self.misplacedLetters) and not (self.solution[i] == word[i]):
+                    valid = False
+                    break
+                # if this word has a letter in a wrong position that was already guessed
+                if i in self.inSolution[word[i]]:
+                    valid = False
+                    break
+                # if this position is in the solution the guessword should match
+                if self.solution[i] != self.LTR_WRONG and self.solution[i] != word[i]:
+                    valid = False
+                    break
+            # ensure all misplaced letters are in the word
+            for c in self.misplacedLetters:
+                if not c in word:
+                    valid = False
+            if not valid:
+                self.words.remove(word)
+                j -= 1
+            j += 1
+
         # pick a new guess
         if self.numCorrect == self.WordLength - 1 and len(self.words) > 2:
             # despite having nearly solved the word, there are too many options left. Knock out multiple in one guess by guessing an unrelated word
@@ -142,31 +168,12 @@ class WordleSolver:
                     maxInWord = inWord
                     maxWord = word
             self.lastGuessed = maxWord
-            return maxWord 
-        else:
-            # guess as normal
-            for word in self.words:
-                valid = True
-                for i in range(self.WordLength):
-                    if word[i] in self.noMoreInSolution and not (word[i] in self.misplacedLetters) and not (self.solution[i] == word[i]):
-                        valid = False
-                        break
-                    # if this word has a letter in a wrong position that was already guessed
-                    if i in self.inSolution[word[i]]:
-                        valid = False
-                        break
-                    # if this position is in the solution the guessword should match
-                    if self.solution[i] != self.LTR_WRONG and self.solution[i] != word[i]:
-                        valid = False
-                        break
-                # ensure all misplaced letters are in the word
-                for c in self.misplacedLetters:
-                    if not c in word:
-                        valid = False
-                if valid:
-                    self.lastGuessed = word
-                    return word
-                else:
-                    self.words.remove(word)
-        # all guesses have been exhausted
-        return "This wordle is unkown"
+            # the best only has 1, skip this alternate strategy
+            if maxInWord != 1:
+                print(self.words)
+                self.lastGuessed = maxWord
+                return maxWord 
+
+        # guess as normal
+        self.lastGuessed = self.words[0]
+        return self.words[0]
