@@ -5,14 +5,14 @@ scoresPath = "Data/commonScores.txt"
 usedPath = "Data/pastWords.txt"
 
 print("========== WORDLE SOLVER ==========")
-solver = WordleSolver(wordsPath, usedPath, scoresPath, 5)
+solver = WordleSolver(wordsPath, [], 5)
 print("Keys: ")
 print("?: Character is not in the wordle")
 print("*: Character is in the wordle")
 print("!: Character is in the wordle in the right spot")
 print("Guess 1: "+solver.lastGuessed)
 
-for i in range(4):
+for i in range(5):
     mask = input("Enter the response mask: ")
     
     if len(mask) != 5:

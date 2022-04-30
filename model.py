@@ -1,7 +1,7 @@
 import string
 
 class WordleSolver:
-    def __init__(self, WordListPath, UsedListPath, ScoreListPath, WordLength):
+    def __init__(self, WordListPath, UsedWords, WordLength):
         # ? with ascii 63 will mark incorrect letters
         self.LTR_WRONG = '?'
         # ! with ascii 33 will mark correct letters
@@ -21,10 +21,10 @@ class WordleSolver:
         self.noMoreInSolution = set()        
         for c in string.ascii_lowercase:
             self.inSolution[c] = []
-        self.buildWordList(WordListPath, UsedListPath, ScoreListPath)
+        self.buildWordList(WordListPath, UsedWords)
     
     # Create the word list that will be used for guessing
-    def buildWordList(self, WordListPath, UsedListPath, ScoreListPath):
+    def buildWordList(self, WordListPath, UsedWords):
         # initialize letter statistics for scoring
         commonLetters = {}
         for c in string.ascii_lowercase:
@@ -46,27 +46,13 @@ class WordleSolver:
 
         wordKeys = list(words.keys())
 
-        # compute the scoring of each word (include usage scroing, which I have found to not be useful)
-        # scoreFile = open(ScoreListPath, "r")
-        # i = 0
-        # for score in scoreFile:
-        #     words[wordKeys[i]] = int(score)/2
-        #     if len(set(word)) == len(word):
-        #         words[wordKeys[i]] += 100
-        #     for j in range(self.WordLength):
-        #         words[wordKeys[i]] += commonLetters[word[j]][j]
-        #     i+=1
-        # scoreFile.close()
-
         # remove words which are already guessed from the word list
-        # usedFile = open(UsedListPath, "r")
-        # for word in usedFile:
-        #     word = word.lower().rstrip()
-        #     # if the word has been used before it should not be used for guessing
-        #     if word in wordKeys:
-        #         del words[word]
-        # usedFile.close()
-
+        for word in UsedWords:
+            word = word.lower().rstrip()
+            # if the word has been used before it should not be used for guessing
+            if word in wordKeys:
+                del words[word]
+        
         # letter commonality scoring
         for word in words:
             for j in range(self.WordLength):
@@ -170,7 +156,6 @@ class WordleSolver:
             self.lastGuessed = maxWord
             # the best only has 1, skip this alternate strategy
             if maxInWord != 1:
-                print(self.words)
                 self.lastGuessed = maxWord
                 return maxWord 
 
